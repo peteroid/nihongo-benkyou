@@ -1,56 +1,94 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
+import { graphql } from 'gatsby';
+import { shuffle, get } from 'lodash'
 import '../styles/index.css';
 
-function Index() {
-  const [date, setDate] = useState(null);
-  useEffect(() => {
-    async function getDate() {
-      const res = await fetch('/api/date');
-      const newDate = await res.text();
-      setDate(newDate);
+const getQuestioner = (words = [], record = {}, n = 4) => {
+  const validWords = words.slice().filter(w => !get(record, `${w.id}.familiar`))
+  let selections = shuffle(validWords).slice(0, n)
+  const answer = selections[0]
+  selections = shuffle(selections)
+  return { answer, selections, final: validWords.length <= n }
+}
+
+function Index({ data }) {
+  const [completed, setCompleted] = useState(false)
+  const [score, setScore] = useState(0)
+  const [wordRecord, setWordRecord] = useState({})
+  const words = data.allWord.edges.map(({ node: { id, nihongo: jp, english: en } }) => ({
+    jp, en, id
+  }))
+
+  const { answer, selections, final } = getQuestioner(words, wordRecord)
+  const onAnswer = (s) => () => {
+    if (final) {
+      setCompleted(true)
+      return
     }
-    getDate();
-  }, []);
+
+    const familiar = s === answer
+    setWordRecord({
+      ...wordRecord,
+      [answer.id]: {
+        familiar
+      }
+    })
+    setScore(score + (familiar ? 1 : -1))
+  }
+
+  const onReset = () => {
+    setCompleted(false)
+    setWordRecord({})
+  }
+
   return (
-    <main>
+    <>
       <Helmet>
-        <title>Gatsby + Node.js (TypeScript) API</title>
+        <title>Nihongo Benkyou</title>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width"
+        />
       </Helmet>
-      <h1>Gatsby + Node.js (TypeScript) API</h1>
-      <h2>
-        Deployed with{' '}
-        <a
-          href="https://vercel.com/docs"
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          Vercel
-        </a>
-        !
-      </h2>
-      <p>
-        <a
-          href="https://github.com/vercel/vercel/blob/master/gatsby"
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          This project
-        </a>{' '}
-        is a <a href="https://www.gatsbyjs.org/">Gatsby</a> app with two
-        directories, <code>/src</code> for static content and <code>/api</code>{' '}
-        which contains a serverless{' '}
-        <a href="https://nodejs.org/en/">Node.js (TypeScript)</a> function. See{' '}
-        <a href="/api/date">
-          <code>api/date</code> for the Date API with Node.js (TypeScript)
-        </a>
-        .
-      </p>
-      <br />
-      <h2>The date according to Node.js (TypeScript) is:</h2>
-      <p>{date ? date : 'Loading date...'}</p>
-    </main>
+      <div className='main__container'>
+        <div className='main__question'>
+          <h1>Nihongo テスト</h1>
+          <p>Score: {score}</p>
+          {completed ? (
+            <div>
+              <h3>Nice! You've compeleted all the questions</h3>
+              <button onClick={onReset}>Restart</button>
+            </div>
+          ) : (
+            <div className='main__answer'>
+              <h2>Which one best describes "{answer.en}"?</h2>
+              <ul>
+                {selections.map((s) => (
+                  <li key={s.en}><button onClick={onAnswer(s)}>{s.jp}</button></li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
+
+export const query = graphql`
+  query Words {
+    allWord(filter: {nihongo: {ne: ""}, english: {nin: ""}}) {
+      edges {
+        node {
+          id
+          nihongo
+          english
+        }
+      }
+    }
+  }
+`
+
 
 export default Index;
