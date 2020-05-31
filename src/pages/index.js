@@ -10,6 +10,7 @@ const getQuestion = (words = [], record = {}, lesson = '', qType = '', aType = '
     .filter(w => !lesson || w.lesson === lesson)
     .filter(w => w[qType] && w[aType])
   let selections = shuffle(validWords).slice(0, n)
+  if (uniq(selections.map(w => w[aType])).length !== n) return getQuestion(words, record, lesson, qType, aType, n)
   const answer = selections[0]
   selections = shuffle(selections)
   return { answer, selections, final: validWords.length <= n }
@@ -19,6 +20,8 @@ function Index({ data }) {
   const [completed, setCompleted] = useState(false)
   const [started, setStarted] = useState(false)
   const [lesson, setLesson] = useState('')
+  const [question, setQuestion] = useState({})
+  const [lastAnswer, setLastAnswer] = useState(null)
   const [wordRecord, setWordRecord] = useState({})
   const words = data.allWord.edges.map(({ node: { id, lesson, nihongo: jp, hiragana: jpScript, english: en } }) => ({
     jp, en, id, lesson, jpScript
@@ -29,12 +32,16 @@ function Index({ data }) {
   const questionType = 'jp'
   const answerType = 'jpScript'
 
-  const { answer, selections, final } = getQuestion(words, wordRecord, lesson, questionType, answerType)
+  const setNewQuestion = () => setQuestion(getQuestion(words, wordRecord, lesson, questionType, answerType))
+
+  const { answer, selections, final } = question
   const onAnswer = (s) => () => {
     if (final) {
       setCompleted(true)
       return
     }
+
+    setLastAnswer(s)
 
     const familiar = s === answer
     setWordRecord({
@@ -44,6 +51,11 @@ function Index({ data }) {
         familiar
       }
     })
+
+    setTimeout(() => {
+      setNewQuestion()
+      setLastAnswer(null)
+    }, 2500)
   }
 
   const onReset = () => {
@@ -54,6 +66,7 @@ function Index({ data }) {
   const onSelectLesson = (lesson = '') => () => {
     setLesson(lesson)
     setStarted(true)
+    setNewQuestion()
   }
 
   const trialCount = Object.keys(wordRecord).length
@@ -94,10 +107,17 @@ function Index({ data }) {
             </div>
           ) : (
             <div className='main__answer'>
-              <h2>Which one best describes "{answer[questionType]}"?</h2>
+              <h2>「{answer[questionType]}」は何ですか？</h2>
               <ul>
                 {selections.map((s) => (
-                  <li key={s.en}><button onClick={onAnswer(s)}>{s[answerType]}</button></li>
+                  <li key={s[answerType]}>
+                    <button onClick={onAnswer(s)}>
+                      {lastAnswer && (lastAnswer.id === s.id || answer.id === s.id) && (
+                        <span>{lastAnswer ? (answer.id === s.id ? '👍🏼' : '👎🏼') : ''}</span>
+                      )}
+                      {s[answerType]}
+                    </button>
+                  </li>
                 ))}
               </ul>
             </div>
