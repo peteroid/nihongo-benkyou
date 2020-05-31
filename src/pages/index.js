@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { graphql } from 'gatsby'
 import { IoMdInformationCircleOutline, IoMdReturnLeft } from 'react-icons/io'
@@ -20,6 +20,24 @@ const getQuestion = (words = [], record = {}, lesson = '', qType = '', aType = '
 
 const getLookupUrl = (word = '') => `https://jisho.org/search/${word}`
 
+const RecordSaveKey = 'nhgbk__record__default'
+const getSavedRecord = () => {
+  try {
+    return JSON.parse(localStorage.getItem(RecordSaveKey))
+  } catch (err) {
+    console.log('Cannot get saved record', err)
+  }
+}
+const saveRecord = (record = {}) => {
+  try {
+    localStorage.setItem(RecordSaveKey, JSON.stringify(record))
+    return true
+  } catch (err) {
+    console.log('Cannot save record', err)
+  }
+  return false
+}
+
 function Index({ data }) {
   const [started, setStarted] = useState(false)
   const [completed, setCompleted] = useState(false)
@@ -31,6 +49,15 @@ function Index({ data }) {
   const words = data.allWord.edges.map(({ node: { id, lesson, nihongo: jp, hiragana: jpScript, english: en } }) => ({
     jp, en, id, lesson, jpScript
   }))
+
+  useEffect(() => {
+    const record = getSavedRecord()
+    if (record) setWordRecord(record)
+  }, [])
+
+  useEffect(() => {
+    if (Object.keys(wordRecord).length !== 0) saveRecord(wordRecord)
+  }, [wordRecord])
 
   const avilableLessons = uniq(words.map(w => w.lesson).filter(Boolean))
 
@@ -67,8 +94,12 @@ function Index({ data }) {
   }
 
   const onReset = () => {
+    const yes = window.confirm('Are you sure?')
+    if (!yes) return
     setCompleted(false)
+    saveRecord({})
     setWordRecord({})
+    setShowStats(false)
   }
 
   const onSelectLesson = (lesson = '') => () => {
@@ -96,7 +127,7 @@ function Index({ data }) {
       </Helmet>
       <div className='main__container'>
         <div className='main__header'>
-          {trialCount ? (
+          {started && trialCount ? (
             <>
               <h2>You got {familiarCount}/{trialCount}</h2>
               <AiOutlineFileSearch className='header__check-icon' onClick={() => setShowStats(true)} />
@@ -123,6 +154,7 @@ function Index({ data }) {
                     <span>{familiar ? '👍🏼' : '👎🏼'}</span>
                   </h3>
                 ))}
+                <button onClick={onReset}>Reset</button>
               </div>
               <div className='stats__footer'>
                 <IoMdReturnLeft onClick={() => setShowStats(false)} />
@@ -139,7 +171,7 @@ function Index({ data }) {
               <ul>
                 {selections.map((s) => (
                   <li key={s[answerType]}>
-                    <button onClick={onAnswer(s)}>
+                    <button onClick={!lastAnswer ? onAnswer(s) : null}>
                       {lastAnswer && (lastAnswer.id === s.id || answer.id === s.id) && (
                         <span>{lastAnswer ? (answer.id === s.id ? '👍🏼' : '👎🏼') : ''}</span>
                       )}
