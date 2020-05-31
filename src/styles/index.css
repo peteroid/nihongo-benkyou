@@ -68,6 +68,7 @@ h3 {
   margin: 20px;
   border-radius: 20px;
   padding: 20px;
+  min-width: 33%;
 }
 
 .main__answer h2 {
@@ -83,6 +84,18 @@ h3 {
 
 .main__answer ul li {
   padding: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.main__answer .answer__info-link {
+  display: flex;
+}
+
+.main__answer .answer__info-icon {
+  font-size: 1.8rem;
+  color: #242424;
+  margin-left: 10px;
 }
 
 .main__question {

@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
-import { graphql } from 'gatsby';
+import React, { useState } from 'react'
+import { Helmet } from 'react-helmet'
+import { graphql } from 'gatsby'
+import { IoMdInformationCircleOutline } from 'react-icons/io'
+import { AiOutlineFileSearch } from 'react-icons/ai'
 import { shuffle, get, uniq } from 'lodash'
-import '../styles/index.css';
+import '../styles/index.css'
 
 const getQuestion = (words = [], record = {}, lesson = '', qType = '', aType = '',  n = 4) => {
   const validWords = words.slice()
@@ -15,6 +17,8 @@ const getQuestion = (words = [], record = {}, lesson = '', qType = '', aType = '
   selections = shuffle(selections)
   return { answer, selections, final: validWords.length <= n }
 }
+
+const getLookupUrl = (word = '') => `https://jisho.org/search/${word}`
 
 function Index({ data }) {
   const [completed, setCompleted] = useState(false)
@@ -29,12 +33,15 @@ function Index({ data }) {
 
   const avilableLessons = uniq(words.map(w => w.lesson).filter(Boolean))
 
-  const questionType = 'jp'
+  const setNewQuestion = (l = lesson) => setQuestion({
+    ...getQuestion(words, wordRecord, l, questionType, answerType),
+    seed: Math.random() * 10000 | 0
+  })
+
+  const { answer, selections, final, seed } = question
+  const questionType = (seed && seed % 2 === 1) ? 'en' : 'jp'
   const answerType = 'jpScript'
 
-  const setNewQuestion = () => setQuestion(getQuestion(words, wordRecord, lesson, questionType, answerType))
-
-  const { answer, selections, final } = question
   const onAnswer = (s) => () => {
     if (final) {
       setCompleted(true)
@@ -66,7 +73,7 @@ function Index({ data }) {
   const onSelectLesson = (lesson = '') => () => {
     setLesson(lesson)
     setStarted(true)
-    setNewQuestion()
+    setNewQuestion(lesson)
   }
 
   const trialCount = Object.keys(wordRecord).length
@@ -76,17 +83,23 @@ function Index({ data }) {
   return (
     <>
       <Helmet>
-        <title>Nihongo Benkyou</title>
+        <title>日本語勉強</title>
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600&display=swap" rel="stylesheet" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600&display=swap"
+        />
       </Helmet>
       <div className='main__container'>
         <div className='main__header'>
           {trialCount ? (
-            <h2>You got {familiarCount}/{trialCount}</h2>
+            <>
+              <h2>You got {familiarCount}/{trialCount}</h2>
+              <AiOutlineFileSearch />
+            </>
           ) : (
             <h2>Let's learn Nihongo</h2>
           )}
@@ -94,20 +107,20 @@ function Index({ data }) {
         <div className='main__question'>
           {!started ? (
             <div>
-              <h3>Select the question bank</h3>
+              <h3>Please select a question bank:</h3>
               <button onClick={onSelectLesson()}>ぜんぶ</button>
               {avilableLessons.map(l => (
-                <button key={l} onClick={onSelectLesson(l)}>{l}かい</button>
+                <button key={l} onClick={onSelectLesson(l)}>{l}回</button>
               ))}
             </div>
           ) : completed ? (
             <div>
-              <h3>Nice! You've compeleted all the questions</h3>
+              <h3>いいですよ！終わりました〜</h3>
               <button onClick={onReset}>Restart</button>
             </div>
           ) : (
             <div className='main__answer'>
-              <h2>「{answer[questionType]}」は何ですか？</h2>
+              <h2>「<a href={getLookupUrl(answer[questionType])} target='_blank' rel='noreferrer'>{answer[questionType]}</a>」 は何ですか？</h2>
               <ul>
                 {selections.map((s) => (
                   <li key={s[answerType]}>
@@ -117,6 +130,9 @@ function Index({ data }) {
                       )}
                       {s[answerType]}
                     </button>
+                    <a href={getLookupUrl(s[answerType])} className='answer__info-link' target='_blank' rel='noreferrer'>
+                      <IoMdInformationCircleOutline className='answer__info-icon' />
+                    </a>
                   </li>
                 ))}
               </ul>
