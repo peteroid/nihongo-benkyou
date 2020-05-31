@@ -32,7 +32,7 @@ exports.sourceNodes = async ({
     return data
   }, [])
 
-  console.log(words)
+  console.log(`Fetched words: ${words.length}`)
 
   const data = {
     words

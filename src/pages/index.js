@@ -14,7 +14,6 @@ const getQuestioner = (words = [], record = {}, n = 4) => {
 
 function Index({ data }) {
   const [completed, setCompleted] = useState(false)
-  const [score, setScore] = useState(0)
   const [wordRecord, setWordRecord] = useState({})
   const words = data.allWord.edges.map(({ node: { id, nihongo: jp, english: en } }) => ({
     jp, en, id
@@ -31,10 +30,10 @@ function Index({ data }) {
     setWordRecord({
       ...wordRecord,
       [answer.id]: {
+        ...wordRecord[answer.id],
         familiar
       }
     })
-    setScore(score + (familiar ? 1 : -1))
   }
 
   const onReset = () => {
@@ -42,6 +41,9 @@ function Index({ data }) {
     setWordRecord({})
   }
 
+  const trialCount = Object.keys(wordRecord).length
+  const familiarCount = Object.values(wordRecord).filter(w => w.familiar).length
+  const accur = familiarCount * 100 / trialCount | 0
   return (
     <>
       <Helmet>
@@ -50,11 +52,14 @@ function Index({ data }) {
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600&display=swap" rel="stylesheet" />
       </Helmet>
       <div className='main__container'>
+        <div className='main__header'>
+          <h1>Nihongo</h1>
+          {!isNaN(accur) && <h2>Accuracy: {accur}%</h2>}
+        </div>
         <div className='main__question'>
-          <h1>Nihongo テスト</h1>
-          <p>Score: {score}</p>
           {completed ? (
             <div>
               <h3>Nice! You've compeleted all the questions</h3>

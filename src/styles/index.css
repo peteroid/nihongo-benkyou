@@ -1,10 +1,11 @@
 body, html {
-  font-family: 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-family: 'Poppins', 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
   margin: 0;
   padding: 0;
   height: 100%;
   color: linen;
   background-color: #242424;
+  font-size: 16px;
 }
 
 div#___gatsby, div#gatsby-focus-wrapper {
@@ -20,24 +21,67 @@ h1, h2, h3, h4, p, ul {
   margin: 0;
 }
 
+h1 {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+}
+
 .main__container {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.main__header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(0,149,218,0.85) 9.9%, rgba(56,80,114,1) 100.3% );
+  padding-bottom: 2.5rem;
+  border-bottom-left-radius: 50%;
+  border-bottom-right-radius: 50%;
+  margin-bottom: -2.5rem;
 }
 
 .main__question {
-  height: 100%;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
 }
 
-.main__container h1, .main__container h2, .main__container h3 {
-  padding: 10px 0;
+.main__answer {
+  text-align: center;
+  background-color: whitesmoke;
+  background-image: radial-gradient( circle 827px at 47.3% 48%,  rgba(255,255,255,1) 0%, rgba(138,192,216,1) 90% );
+  margin: 20px;
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.main__answer h2 {
+  color: #242424;
 }
 
 .main__answer ul {
   list-style: none;
+  display: inline-flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.main__answer ul li {
+  padding: 10px;
 }
 
 .main__question button {
@@ -45,13 +89,29 @@ h1, h2, h3, h4, p, ul {
   border: none;
   margin: 0;
   width: 100%;
-  margin: 10px;
-  padding: 10px 0;
+  padding: 15px 30px;
+  border-radius: 30px;
+  border: 2px solid whitesmoke;
   background-color: slategray;
+  background-image: linear-gradient( 171.8deg,  rgba(5,111,146,1) 13.5%, rgba(6,57,84,1) 78.6% );
   color: whitesmoke;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .main__question button:hover {
+  background-image: none;
   background-color: whitesmoke;
+  border-color: slategray;
   color: slategray;
+}
+
+@media only screen and (max-width: 600px) {
+  body, html {
+    font-size: 13px;
+  }
+
+  .main__header {
+    align-items: center;
+  }
 }
