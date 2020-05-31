@@ -1,16 +1,16 @@
 module.exports = {
   siteMetadata: {
-    title: 'Gatsby + Node.js (TypeScript) API',
+    title: '日本語勉強',
   },
   plugins: [
     `gatsby-plugin-react-helmet`,
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: 'Gatsby + Node.js (TypeScript) API',
-        short_name: 'Gatsby + Node.js (TypeScript)',
+        name: '日本語勉強',
+        short_name: '日本語勉強',
         start_url: '/',
-        icon: 'src/images/gatsby-icon.png',
+        icon: 'src/images/site-logo.png',
       },
     },
   ],
