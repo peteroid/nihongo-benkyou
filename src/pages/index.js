@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { graphql } from 'gatsby'
-import { IoMdInformationCircleOutline } from 'react-icons/io'
+import { IoMdInformationCircleOutline, IoMdReturnLeft } from 'react-icons/io'
 import { AiOutlineFileSearch } from 'react-icons/ai'
 import { shuffle, get, uniq } from 'lodash'
 import '../styles/index.css'
@@ -21,8 +21,9 @@ const getQuestion = (words = [], record = {}, lesson = '', qType = '', aType = '
 const getLookupUrl = (word = '') => `https://jisho.org/search/${word}`
 
 function Index({ data }) {
-  const [completed, setCompleted] = useState(false)
   const [started, setStarted] = useState(false)
+  const [completed, setCompleted] = useState(false)
+  const [showStats, setShowStats] = useState(false)
   const [lesson, setLesson] = useState('')
   const [question, setQuestion] = useState({})
   const [lastAnswer, setLastAnswer] = useState(null)
@@ -98,7 +99,7 @@ function Index({ data }) {
           {trialCount ? (
             <>
               <h2>You got {familiarCount}/{trialCount}</h2>
-              <AiOutlineFileSearch />
+              <AiOutlineFileSearch className='header__check-icon' onClick={() => setShowStats(true)} />
             </>
           ) : (
             <h2>Let's learn Nihongo</h2>
@@ -112,6 +113,20 @@ function Index({ data }) {
               {avilableLessons.map(l => (
                 <button key={l} onClick={onSelectLesson(l)}>{l}回</button>
               ))}
+            </div>
+          ) : showStats ? (
+            <div className='main__stats'>
+              <div className='stats__words'>
+                {Object.entries(wordRecord).map(([id, { familiar }]) => (
+                  <h3 className={!familiar ? 'stats__wrong' : ''}>
+                    <strong>{words.find(w => w.id === id).jp}</strong>
+                    <span>{familiar ? '👍🏼' : '👎🏼'}</span>
+                  </h3>
+                ))}
+              </div>
+              <div className='stats__footer'>
+                <IoMdReturnLeft onClick={() => setShowStats(false)} />
+              </div>
             </div>
           ) : completed ? (
             <div>
