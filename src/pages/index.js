@@ -124,6 +124,11 @@ function Index({ data }) {
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600&display=swap"
         />
+        <script
+          async
+          data-ad-client="ca-pub-9038837200104983"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
+        />
       </Helmet>
       <div className='main__container'>
         <div className='main__header'>
